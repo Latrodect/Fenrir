@@ -1,14 +1,18 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
-from tkinter.simpledialog import askstring
-from tkinter import ttk
 import pyautogui
-from PIL import Image, ImageTk, ImageDraw, ImageFont
+from PIL import Image, ImageTk
 import time
-
+import os
 
 class Fenrir:
     def __init__(self, root) -> None:
+        """
+        Initialize the Fenrir application window.
+
+        Args:
+            root (tk.Tk): The main Tkinter window.
+        """
         self.root = root
         self.root.title("Fenrir Editor")
 
@@ -34,6 +38,9 @@ class Fenrir:
         self.create_main_interface()
 
     def create_main_interface(self):
+        """
+        Creates the main user interface for the Fenrir application, including buttons for recording, saving, and editing GIFs.
+        """
         self.button_frame = tk.Frame(self.root, bg="#19191B")
         self.button_frame.pack(pady=10)
 
@@ -48,13 +55,13 @@ class Fenrir:
         menu = self.time_menu["menu"]
         menu.config(bg="#2E2E2E", fg="#FFFFFF", bd=0, relief="flat")
 
-        # Menü font ayarları
         menu.config(font=("Segoe UI", 10))
         self.time_menu.config(font=("Segoe UI", 10))
 
         self.time_menu["indicatoron"] = False
 
-        r_icon = Image.open("images/record.png")
+        r_image_path = os.path.join(os.path.dirname(__file__), 'images', 'record.png')
+        r_icon = Image.open(r_image_path)
         r_icon = r_icon.resize((25, 25))
         self.record_icon = ImageTk.PhotoImage(r_icon)
         self.record_button = tk.Button(
@@ -71,7 +78,8 @@ class Fenrir:
             compound=tk.LEFT,
         )
 
-        st_icon = Image.open("images/stop.png")
+        st_image_path = os.path.join(os.path.dirname(__file__), 'images', 'stop.png')
+        st_icon = Image.open(st_image_path)
         st_icon = st_icon.resize((25, 25))
         self.stop_icon = ImageTk.PhotoImage(st_icon)
         self.stop_record_button = tk.Button(
@@ -89,7 +97,8 @@ class Fenrir:
             compound=tk.LEFT,
         )
 
-        s_icon = Image.open("images/save.png")
+        s_image_path = os.path.join(os.path.dirname(__file__), 'images', 'save.png')
+        s_icon = Image.open(s_image_path)
         s_icon = s_icon.resize((20, 20))
         self.save_icon = ImageTk.PhotoImage(s_icon)
         self.save_button = tk.Button(
@@ -107,7 +116,8 @@ class Fenrir:
             compound=tk.LEFT,
         )
 
-        e_icon = Image.open("images/edit.png")
+        e_image_path = os.path.join(os.path.dirname(__file__), 'images', 'edit.png')
+        e_icon = Image.open(e_image_path)
         e_icon = e_icon.resize((20, 20))
         self.edit_icon = ImageTk.PhotoImage(e_icon)
         self.edit_button = tk.Button(
@@ -144,6 +154,9 @@ class Fenrir:
         self.frames_container.bind("<Configure>", self.update_scrollregion)
 
     def create_custom_toolbar(self):
+        """
+        Creates a custom toolbar with a title and close button.
+        """
         self.toolbar = tk.Frame(self.root, bg="#19191B", height=30)
         self.toolbar.pack(fill=tk.X, side=tk.TOP)
 
@@ -172,10 +185,22 @@ class Fenrir:
         self.toolbar.bind("<B1-Motion>", self.on_drag_motion)
 
     def on_drag_start(self, event):
+        """
+        Start dragging the window.
+
+        Args:
+            event (tk.Event): The event triggered by clicking the toolbar.
+        """
         self.x_start = event.x_root
         self.y_start = event.y_root
 
     def on_drag_motion(self, event):
+        """
+        Move the window during dragging.
+
+        Args:
+            event (tk.Event): The event triggered by dragging the mouse.
+        """
         dx = event.x_root - self.x_start
         dy = event.y_root - self.y_start
         new_x = self.root.winfo_x() + dx
@@ -185,9 +210,18 @@ class Fenrir:
         self.y_start = event.y_root
 
     def update_scrollregion(self, event):
+        """
+        Update the scroll region of the canvas.
+
+        Args:
+            event (tk.Event): The event triggered by resizing the frames container.
+        """
         self.frames_canvas.config(scrollregion=self.frames_canvas.bbox("all"))
 
     def start_selection(self):
+        """
+        Start the screen selection process for recording.
+        """
         self.selection_window = tk.Toplevel(self.root)
         self.selection_window.attributes("-fullscreen", True)
         self.selection_window.attributes("-alpha", 0.3)
@@ -201,6 +235,12 @@ class Fenrir:
         self.canvas.bind("<ButtonRelease-1>", self.on_button_release)
 
     def on_button_press(self, event):
+        """
+        Handle mouse button press event for selection.
+
+        Args:
+            event (tk.Event): The event triggered by pressing the mouse button.
+        """
         self.start_x = self.canvas.canvasx(event.x)
         self.start_y = self.canvas.canvasy(event.y)
         self.rect = self.canvas.create_rectangle(
@@ -213,19 +253,35 @@ class Fenrir:
         )
 
     def on_mouse_drag(self, event):
+        """
+        Handle mouse drag event for resizing the selection rectangle.
+
+        Args:
+            event (tk.Event): The event triggered by dragging the mouse.
+        """
         cur_x, cur_y = (self.canvas.canvasx(event.x), self.canvas.canvasy(event.y))
         self.canvas.coords(self.rect, self.start_x, self.start_y, cur_x, cur_y)
 
     def on_button_release(self, event):
+        """
+        Handle mouse button release event after selection.
+
+        Args:
+            event (tk.Event): The event triggered by releasing the mouse button.
+        """
         end_x = self.canvas.canvasx(event.x)
         end_y = self.canvas.canvasy(event.y)
 
+        start_x, end_x = sorted([self.start_x, end_x])
+        start_y, end_y = sorted([self.start_y, end_y])
+
         self.recording_area = (
-            int(self.start_x),
-            int(self.start_y),
-            int(end_x - self.start_x),
-            int(end_y - self.start_y),
+            int(start_x),
+            int(start_y),
+            int(end_x - start_x),
+            int(end_y - start_y),
         )
+        
         self.selection_window.destroy()
 
         self.countdown_label = tk.Label(
@@ -234,7 +290,7 @@ class Fenrir:
         self.countdown_label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
         self.countdown(5)
 
-    def countdown(self, count):
+    def countdown(self, count):  
         if count > 0:
             self.countdown_label.config(text=str(count))
             self.root.after(1000, self.countdown, count - 1)
@@ -261,6 +317,9 @@ class Fenrir:
         self.record_screen()
 
     def stop_recording(self):
+        """
+        Stop the screen recording.
+        """
         self.recording = False
         self.record_button.config(state="normal")
         self.stop_record_button.config(state="disabled")
@@ -269,6 +328,9 @@ class Fenrir:
         self.countdown_label.destroy()
 
     def record_screen(self):
+        """
+        Start the screen recording based on the selected area.
+        """
         if not self.recording:
             return
 
@@ -288,6 +350,9 @@ class Fenrir:
         self.record_screen()
 
     def save_gif(self):
+        """
+        Save the recorded frames as a GIF file.
+        """
         if not self.frames:
             return
 
@@ -305,6 +370,9 @@ class Fenrir:
             messagebox.showinfo("Info", f"GIF saved as {save_path}")
 
     def populate_frame_list(self):
+        """
+        Populate the frame list with thumbnails and enable editing features.
+        """
         for widget in self.frames_container.winfo_children():
             widget.destroy()
 
@@ -325,6 +393,9 @@ class Fenrir:
         self.frames_canvas.config(scrollregion=self.frames_canvas.bbox("all"))
 
     def display_gif(self):
+        """
+        Display the GIF and its frames in the editing panel.
+        """
         if not self.frames:
             return
 
@@ -332,19 +403,15 @@ class Fenrir:
         self.edit_gif_label.config(image=gif_image)
         self.edit_gif_label.image = gif_image
 
-        # Get GIF dimensions
         gif_width = gif_image.width()
         gif_height = gif_image.height()
 
-        # Define padding to add around the GIF
         padding_width = 200
         padding_height = 200
 
-        # Calculate panel size based on GIF dimensions and padding
         panel_width = gif_width + padding_width
         panel_height = gif_height + padding_height
 
-        # Update the geometry of the edit panel if it's already open
         if hasattr(self, 'edit_panel') and self.edit_panel.winfo_exists():
             screen_width = self.root.winfo_screenwidth()
             screen_height = self.root.winfo_screenheight()
@@ -353,40 +420,34 @@ class Fenrir:
             self.edit_panel.geometry(f"{panel_width}x{panel_height}+{x}+{y}")
 
     def open_edit_panel(self):
-        # Create the edit panel
+        """
+        Open the GIF editing panel.
+        """
         self.edit_panel = tk.Toplevel(self.root)
         self.edit_panel.title("Edit GIF")
         self.edit_panel.overrideredirect(True)
 
-        # Define initial panel size
         initial_panel_width = 800
         initial_panel_height = 700
 
-        # Define background color
         bg_color = "#19191B"
 
-        # Calculate the gif dimensions plus additional padding
         gif_width = self.frames[0].width if self.frames else initial_panel_width
         gif_height = self.frames[0].height if self.frames else initial_panel_height
 
         panel_width = gif_width + 150
         panel_height = gif_height + 150
 
-        # Get screen dimensions
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
 
-        # Calculate the x and y coordinates for centering the panel
         x = (screen_width - panel_width) // 2
         y = (screen_height - panel_height) // 2
 
-        # Set the geometry of the edit panel
         self.edit_panel.geometry(f"{panel_width}x{panel_height}+{x}+{y}")
 
-        # Set up the contents of the edit panel
         self.edit_panel.configure(bg=bg_color)
 
-        # Initialize edit_gif_label
         self.edit_gif_label = tk.Label(self.edit_panel, bg="#F2600C")
         self.edit_gif_label.pack(pady=10)
 
@@ -412,7 +473,6 @@ class Fenrir:
 
         self.edit_frames_container.bind("<Configure>", self.update_edit_scrollregion)
 
-        # Instruction label
         self.instruction_label = tk.Label(
             self.edit_scroll_frame,
             text="Click on a frame to delete it.",
@@ -424,7 +484,6 @@ class Fenrir:
         )
         self.instruction_label.pack(pady=10, padx=10, anchor=tk.W)
 
-        # Close button placed at the top-right corner
         self.close_button = tk.Button(
             self.edit_panel,
             command=self.edit_panel.destroy,
@@ -437,7 +496,6 @@ class Fenrir:
         )
         self.close_button.place(relx=1.0, rely=0.0, anchor=tk.NE, x=-10, y=10)
 
-        # Populate frame list and display GIF
         self.populate_edit_frame_list()
         self.display_gif()
 
@@ -448,7 +506,7 @@ class Fenrir:
         for widget in self.edit_frames_container.winfo_children():
             widget.destroy()
 
-        thumbnail_size = (300, 300)  # Increase size as needed
+        thumbnail_size = (300, 300)  
 
         for idx, frame in enumerate(self.frames):
             frame_img = frame.copy()
@@ -467,13 +525,19 @@ class Fenrir:
         self.edit_frames_canvas.config(scrollregion=self.edit_frames_canvas.bbox("all"))
 
     def delete_frame(self, idx):
+        """
+        Deletes the selected frame from the frames list and updates the frame list in the editing panel.
+        """
         if 0 <= idx < len(self.frames):
             del self.frames[idx]
             self.populate_frame_list()
             self.populate_edit_frame_list()
 
 
-if __name__ == "__main__":
+def main():
     root = tk.Tk()
     app = Fenrir(root=root)
     root.mainloop()
+
+if __name__ == "__main__":
+    main()
