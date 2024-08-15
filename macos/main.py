@@ -134,16 +134,6 @@ class Fenrir:
         )
         self.title_label.pack(side=tk.LEFT, padx=10)
 
-        self.close_button = tk.Button(
-            self.toolbar,
-            text="❌",
-            command=self.root.destroy,
-            font=("Segoe UI", 10, "bold"),
-            bd=0,
-            relief="flat",
-        )
-        self.close_button.pack(side=tk.RIGHT)
-
         self.toolbar.bind("<Button-1>", self.on_drag_start)
         self.toolbar.bind("<B1-Motion>", self.on_drag_motion)
 
