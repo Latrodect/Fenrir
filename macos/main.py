@@ -16,7 +16,7 @@ class Fenrir:
         self.root = root
         self.root.title("Fenrir Editor")
 
-        self.root.geometry("470x90")
+        self.root.geometry("400x70")
         self.root.configure()
 
         self.root.update_idletasks()
