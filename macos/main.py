@@ -59,10 +59,6 @@ class Fenrir:
 
         self.time_menu["indicatoron"] = False
 
-        r_image_path = os.path.join(os.path.dirname(__file__), 'images', 'record.png')
-        r_icon = Image.open(r_image_path)
-        r_icon = r_icon.resize((25, 25))
-        self.record_icon = ImageTk.PhotoImage(r_icon)
         self.record_button = tk.Button(
             self.button_frame,
             text="Start Recording",
@@ -73,10 +69,6 @@ class Fenrir:
             pady=3,
         )
 
-        st_image_path = os.path.join(os.path.dirname(__file__), 'images', 'stop.png')
-        st_icon = Image.open(st_image_path)
-        st_icon = st_icon.resize((25, 25))
-        self.stop_icon = ImageTk.PhotoImage(st_icon)
         self.stop_record_button = tk.Button(
             self.button_frame,
             text="Stop Recording",
@@ -88,10 +80,6 @@ class Fenrir:
             pady=3,
         )
 
-        s_image_path = os.path.join(os.path.dirname(__file__), 'images', 'save.png')
-        s_icon = Image.open(s_image_path)
-        s_icon = s_icon.resize((20, 20))
-        self.save_icon = ImageTk.PhotoImage(s_icon)
         self.save_button = tk.Button(
             self.button_frame,
             text="Save GIF",
@@ -103,10 +91,6 @@ class Fenrir:
             pady=3,
         )
 
-        e_image_path = os.path.join(os.path.dirname(__file__), 'images', 'edit.png')
-        e_icon = Image.open(e_image_path)
-        e_icon = e_icon.resize((20, 20))
-        self.edit_icon = ImageTk.PhotoImage(e_icon)
         self.edit_button = tk.Button(
             self.button_frame,
             text="Edit GIF",
