@@ -1,4 +1,3 @@
-
 # Fenrir
 
 ## Overview
@@ -27,7 +26,7 @@ Fenrir is a screen recording tool built using Python. It allows users to select 
 Use the following command to build the executable for Windows:
 
 ```bash
-pyinstaller --clean --onefile --add-data "images;images" --icon=icon.ico --noconsole --name=Fenrir main.py
+pyinstaller --clean --onefile --add-data "images;images" --icon=icon.ico --noconsole --name=Fenrir windows/main.py
 ```
 
 - `--clean`: Removes any temporary files before building.
@@ -42,7 +41,7 @@ pyinstaller --clean --onefile --add-data "images;images" --icon=icon.ico --nocon
 Use the following command to build the executable for macOS:
 
 ```bash
-pyinstaller --clean --onefile --add-data "images:images" --icon=icon.icns --noconsole --name=Fenrir main.py
+pyinstaller --clean --onefile --add-data "images:images" --icon=icon.icns --noconsole --name=Fenrir macos/main.py
 ```
 
 - `--clean`: Removes any temporary files before building.
