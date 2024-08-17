@@ -5,6 +5,7 @@ from PIL import Image, ImageTk
 import time
 import os
 
+
 class Fenrir:
     def __init__(self, root) -> None:
         """
@@ -49,15 +50,26 @@ class Fenrir:
         )
         self.time_menu.grid(row=0, column=0, padx=5)
 
-        self.time_menu.config( bd=0)
+        self.speed_var = tk.StringVar(value="Medium")
+        self.speed_menu = tk.OptionMenu(
+            self.button_frame, self.speed_var, "Slow", "Medium", "Fast"
+        )
+        self.speed_menu.grid(row=0, column=5, padx=5)
+
+        self.time_menu.config(bd=0)
+        self.speed_menu.config(bd=0)
+
+        self._configure_option_menu(self.time_menu)
+        self._configure_option_menu(self.speed_menu)
 
         menu = self.time_menu["menu"]
-        menu.config( bd=0, relief="flat")
+        menu.config(bd=0, relief="flat", font=("Segoe UI", 10))
 
-        menu.config(font=("Segoe UI", 10))
-        self.time_menu.config(font=("Segoe UI", 10))
+        menu = self.speed_menu["menu"]
+        menu.config(bd=0, relief="flat", font=("Segoe UI", 10))
 
         self.time_menu["indicatoron"] = False
+        self.speed_menu["indicatoron"] = False
 
         self.record_button = tk.Button(
             self.button_frame,
@@ -80,6 +92,12 @@ class Fenrir:
             pady=3,
         )
 
+        s_image_path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)), "images", "save.png"
+        )
+        s_icon = Image.open(s_image_path)
+        s_icon = s_icon.resize((20, 20))
+        self.save_icon = ImageTk.PhotoImage(s_icon)
         self.save_button = tk.Button(
             self.button_frame,
             text="Save GIF",
@@ -100,6 +118,8 @@ class Fenrir:
             bd=0,
             padx=3,
             pady=3,
+            image=self.edit_icon,
+            compound=tk.LEFT,
         )
 
         self.record_button.grid(row=0, column=1, padx=5)
@@ -119,6 +139,16 @@ class Fenrir:
         )
 
         self.frames_container.bind("<Configure>", self.update_scrollregion)
+
+    def _configure_option_menu(self, option_menu):
+        """
+        Configures the dropdown menu of an OptionMenu widget.
+
+        Args:
+            option_menu (tk.OptionMenu): The OptionMenu widget to configure.
+        """
+        menu = option_menu["menu"]
+        menu.config(bd=0, relief="flat")
 
     def create_custom_toolbar(self):
         """
@@ -233,16 +263,14 @@ class Fenrir:
             int(end_x - start_x),
             int(end_y - start_y),
         )
-        
+
         self.selection_window.destroy()
 
-        self.countdown_label = tk.Label(
-            self.root, text="", font=("Helvetica", 48)
-        )
+        self.countdown_label = tk.Label(self.root, text="", font=("Helvetica", 48))
         self.countdown_label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
         self.countdown(5)
 
-    def countdown(self, count):  
+    def countdown(self, count):
         if count > 0:
             self.countdown_label.config(text=str(count))
             self.root.after(1000, self.countdown, count - 1)
@@ -257,9 +285,7 @@ class Fenrir:
     def start_recording(self):
         self.recording = True
         self.frames = []
-        self.title_label.config(
-            text="Fenrir", font=("Segoe UI", 10, "bold")
-        )
+        self.title_label.config(text="Fenrir", font=("Segoe UI", 10, "bold"))
         self.record_button.config(state="disabled")
         self.stop_record_button.config(state="normal")
         self.save_button.config(state="disabled")
@@ -362,7 +388,7 @@ class Fenrir:
         panel_width = gif_width + padding_width
         panel_height = gif_height + padding_height
 
-        if hasattr(self, 'edit_panel') and self.edit_panel.winfo_exists():
+        if hasattr(self, "edit_panel") and self.edit_panel.winfo_exists():
             screen_width = self.root.winfo_screenwidth()
             screen_height = self.root.winfo_screenheight()
             x = (screen_width - panel_width) // 2
@@ -378,7 +404,6 @@ class Fenrir:
 
         initial_panel_width = 800
         initial_panel_height = 700
-
 
         gif_width = self.frames[0].width if self.frames else initial_panel_width
         gif_height = self.frames[0].height if self.frames else initial_panel_height
@@ -416,7 +441,9 @@ class Fenrir:
         self.edit_frames_canvas.config(xscrollcommand=self.edit_frames_scrollbar_x.set)
 
         self.edit_frames_container = tk.Frame(self.edit_frames_canvas, bd=0)
-        self.edit_frames_canvas.create_window((0, 0), window=self.edit_frames_container, anchor=tk.NW)
+        self.edit_frames_canvas.create_window(
+            (0, 0), window=self.edit_frames_container, anchor=tk.NW
+        )
 
         self.edit_frames_container.bind("<Configure>", self.update_edit_scrollregion)
 
@@ -425,7 +452,7 @@ class Fenrir:
             text="Click on a frame to delete it.",
             font=("Segoe UI", 10),
             padx=5,
-            pady=5
+            pady=5,
         )
         self.instruction_label.pack(pady=10, padx=10, anchor=tk.W)
 
@@ -439,7 +466,7 @@ class Fenrir:
         for widget in self.edit_frames_container.winfo_children():
             widget.destroy()
 
-        thumbnail_size = (300, 300)  
+        thumbnail_size = (300, 300)
 
         for idx, frame in enumerate(self.frames):
             frame_img = frame.copy()
@@ -471,6 +498,7 @@ def main():
     root = tk.Tk()
     app = Fenrir(root=root)
     root.mainloop()
+
 
 if __name__ == "__main__":
     main()
