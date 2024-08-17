@@ -5,6 +5,7 @@ from PIL import Image, ImageTk
 import time
 import os
 
+
 class Fenrir:
     def __init__(self, root) -> None:
         """
@@ -17,7 +18,7 @@ class Fenrir:
         self.root.title("Fenrir Editor")
 
         self.root.overrideredirect(True)
-        self.root.geometry("470x90")
+        self.root.geometry("540x90")
         self.root.configure(bg="#19191B")
 
         self.root.update_idletasks()
@@ -50,17 +51,30 @@ class Fenrir:
         )
         self.time_menu.grid(row=0, column=0, padx=5)
 
+        self.speed_var = tk.StringVar(value="Medium")
+        self.speed_menu = tk.OptionMenu(
+            self.button_frame, self.speed_var, "Slow", "Medium", "Fast"
+        )
+        self.speed_menu.grid(row=0, column=5, padx=5)
+
         self.time_menu.config(bg="#2E2E2E", fg="#FFFFFF", bd=0)
+        self.speed_menu.config(bg="#2E2E2E", fg="#FFFFFF", bd=0)
+
+        self._configure_option_menu(self.time_menu, "#2E2E2E", "#FFFFFF")
+        self._configure_option_menu(self.speed_menu, "#2E2E2E", "#FFFFFF")
 
         menu = self.time_menu["menu"]
-        menu.config(bg="#2E2E2E", fg="#FFFFFF", bd=0, relief="flat")
+        menu.config(bg="#2E2E2E", fg="#FFFFFF", bd=0, relief="flat", font=("Segoe UI", 10))
 
-        menu.config(font=("Segoe UI", 10))
-        self.time_menu.config(font=("Segoe UI", 10))
+        menu = self.speed_menu["menu"]
+        menu.config(bg="#2E2E2E", fg="#FFFFFF", bd=0, relief="flat", font=("Segoe UI", 10))
 
         self.time_menu["indicatoron"] = False
+        self.speed_menu["indicatoron"] = False
 
-        r_image_path = os.path.join(os.path.dirname(__file__), 'images', 'record.png')
+        r_image_path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)), "images", "record.png"
+        )
         r_icon = Image.open(r_image_path)
         r_icon = r_icon.resize((25, 25))
         self.record_icon = ImageTk.PhotoImage(r_icon)
@@ -78,7 +92,9 @@ class Fenrir:
             compound=tk.LEFT,
         )
 
-        st_image_path = os.path.join(os.path.dirname(__file__), 'images', 'stop.png')
+        st_image_path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)), "images", "stop.png"
+        )
         st_icon = Image.open(st_image_path)
         st_icon = st_icon.resize((25, 25))
         self.stop_icon = ImageTk.PhotoImage(st_icon)
@@ -97,7 +113,9 @@ class Fenrir:
             compound=tk.LEFT,
         )
 
-        s_image_path = os.path.join(os.path.dirname(__file__), 'images', 'save.png')
+        s_image_path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)), "images", "save.png"
+        )
         s_icon = Image.open(s_image_path)
         s_icon = s_icon.resize((20, 20))
         self.save_icon = ImageTk.PhotoImage(s_icon)
@@ -116,7 +134,9 @@ class Fenrir:
             compound=tk.LEFT,
         )
 
-        e_image_path = os.path.join(os.path.dirname(__file__), 'images', 'edit.png')
+        e_image_path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)), "images", "edit.png"
+        )
         e_icon = Image.open(e_image_path)
         e_icon = e_icon.resize((20, 20))
         self.edit_icon = ImageTk.PhotoImage(e_icon)
@@ -152,6 +172,18 @@ class Fenrir:
         )
 
         self.frames_container.bind("<Configure>", self.update_scrollregion)
+        
+    def _configure_option_menu(self, option_menu, bg_color, fg_color):
+        """
+        Configures the dropdown menu of an OptionMenu widget.
+
+        Args:
+            option_menu (tk.OptionMenu): The OptionMenu widget to configure.
+            bg_color (str): The background color for the dropdown menu.
+            fg_color (str): The foreground color (text color) for the dropdown menu.
+        """
+        menu = option_menu["menu"]
+        menu.config(bg=bg_color, fg=fg_color, bd=0, relief="flat")
 
     def create_custom_toolbar(self):
         """
@@ -281,7 +313,7 @@ class Fenrir:
             int(end_x - start_x),
             int(end_y - start_y),
         )
-        
+
         self.selection_window.destroy()
 
         self.countdown_label = tk.Label(
@@ -290,7 +322,7 @@ class Fenrir:
         self.countdown_label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
         self.countdown(5)
 
-    def countdown(self, count):  
+    def countdown(self, count):
         if count > 0:
             self.countdown_label.config(text=str(count))
             self.root.after(1000, self.countdown, count - 1)
@@ -333,10 +365,19 @@ class Fenrir:
         """
         if not self.recording:
             return
+        
+        interval = 0.1
+        speed = self.speed_var.get()
+        if speed == "Slow":
+            interval = 0.3
+        elif speed == "Medium":
+            interval = 0.1
+        elif speed == "Fast":
+            interval = 0.05
 
         screen = pyautogui.screenshot(region=self.recording_area)
         self.frames.append(screen)
-        time.sleep(0.1)
+        time.sleep(interval)
 
         try:
             record_time = float(self.record_time_var.get().replace("s", ""))
@@ -412,7 +453,7 @@ class Fenrir:
         panel_width = gif_width + padding_width
         panel_height = gif_height + padding_height
 
-        if hasattr(self, 'edit_panel') and self.edit_panel.winfo_exists():
+        if hasattr(self, "edit_panel") and self.edit_panel.winfo_exists():
             screen_width = self.root.winfo_screenwidth()
             screen_height = self.root.winfo_screenheight()
             x = (screen_width - panel_width) // 2
@@ -468,8 +509,12 @@ class Fenrir:
 
         self.edit_frames_canvas.config(xscrollcommand=self.edit_frames_scrollbar_x.set)
 
-        self.edit_frames_container = tk.Frame(self.edit_frames_canvas, bg=bg_color, bd=0)
-        self.edit_frames_canvas.create_window((0, 0), window=self.edit_frames_container, anchor=tk.NW)
+        self.edit_frames_container = tk.Frame(
+            self.edit_frames_canvas, bg=bg_color, bd=0
+        )
+        self.edit_frames_canvas.create_window(
+            (0, 0), window=self.edit_frames_container, anchor=tk.NW
+        )
 
         self.edit_frames_container.bind("<Configure>", self.update_edit_scrollregion)
 
@@ -480,7 +525,7 @@ class Fenrir:
             fg="#FFFFFF",
             font=("Segoe UI", 10),
             padx=5,
-            pady=5
+            pady=5,
         )
         self.instruction_label.pack(pady=10, padx=10, anchor=tk.W)
 
@@ -506,7 +551,7 @@ class Fenrir:
         for widget in self.edit_frames_container.winfo_children():
             widget.destroy()
 
-        thumbnail_size = (300, 300)  
+        thumbnail_size = (300, 300)
 
         for idx, frame in enumerate(self.frames):
             frame_img = frame.copy()
@@ -538,6 +583,7 @@ def main():
     root = tk.Tk()
     app = Fenrir(root=root)
     root.mainloop()
+
 
 if __name__ == "__main__":
     main()
